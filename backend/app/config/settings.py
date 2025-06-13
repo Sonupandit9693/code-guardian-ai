@@ -8,8 +8,8 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # Database
-    DATABASE_URL: str = "postgresql://postgres:password@localhost:5432/ai_code_review"
-    MONGODB_URL: str = "mongodb://localhost:27017/ai_code_review"
+    DATABASE_URL: str = "postgresql://postgres:password@localhost:5432/codereviewer"
+    MONGODB_URL: str = "mongodb://localhost:27017/codereviewer"
     
     # Security
     SECRET_KEY: str = "your-secret-key-change-in-production"

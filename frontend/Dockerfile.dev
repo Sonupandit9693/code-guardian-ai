@@ -1,0 +1,37 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install additional dependencies for better compatibility
+RUN apk add --no-cache libc6-compat curl
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies with increased timeout
+RUN npm ci --timeout 120000
+
+# Copy source code
+COPY . .
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Create .next directory and set permissions
+RUN mkdir -p /app/.next && \
+    chmod 755 /app/.next && \
+    chown -R nextjs:nodejs /app
+
+USER nextjs
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:3000 || exit 1
+
+# Start development server
+CMD ["npm", "run", "dev"]
+

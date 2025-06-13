@@ -6,15 +6,18 @@ from contextlib import asynccontextmanager
 import uvicorn
 from app.config.settings import settings
 from app.config.database import database
-from app.api import auth, webhooks, reviews, analytics
+from app.api.v1 import auth, reviews, analytics, github
+from app.api import webhooks
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    await database.connect()
+    if database:  # Only connect if using async database (PostgreSQL)
+        await database.connect()
     yield
     # Shutdown
-    await database.disconnect()
+    if database:  # Only disconnect if using async database
+        await database.disconnect()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -37,6 +40,7 @@ app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["aut
 app.include_router(webhooks.router, prefix=f"{settings.API_V1_STR}/webhooks", tags=["webhooks"])
 app.include_router(reviews.router, prefix=f"{settings.API_V1_STR}/reviews", tags=["reviews"])
 app.include_router(analytics.router, prefix=f"{settings.API_V1_STR}/analytics", tags=["analytics"])
+app.include_router(github.router, prefix=f"{settings.API_V1_STR}/github", tags=["github"])
 
 @app.get("/")
 async def root():
